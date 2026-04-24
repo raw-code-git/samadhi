@@ -1,0 +1,83 @@
+---
+import {
+  ASPECT,
+  IMG_SIZES,
+  IMG_WIDTHS,
+  buildImageUrl,
+  buildSrcset,
+  type ImageSource,
+  type ImageVariant,
+} from '../../lib/images';
+
+type AspectKey = keyof typeof ASPECT;
+
+interface Props {
+  src: string;
+  alt: string;
+  source?: ImageSource;
+  variant?: ImageVariant;
+  aspect?: AspectKey;
+  priority?: boolean;
+  class?: string;
+  rounded?: boolean;
+}
+const {
+  src,
+  alt,
+  source = 'picsum',
+  variant = 'card',
+  aspect = 'card',
+  priority = false,
+  class: className = '',
+  rounded = true,
+} = Astro.props;
+
+const aspectPair = ASPECT[aspect];
+const srcset = buildSrcset(src, source, variant, aspectPair);
+const sizes = IMG_SIZES[variant];
+const widths = IMG_WIDTHS[variant];
+const fallbackWidth = widths[Math.min(widths.length - 1, Math.floor(widths.length / 2))];
+const fallbackHeight = Math.round((fallbackWidth * aspectPair[1]) / aspectPair[0]);
+const fallbackSrc = buildImageUrl(src, source, fallbackWidth, fallbackHeight);
+const aspectClass = {
+  hero: 'aspect-[16/9]',
+  card: 'aspect-[4/3]',
+  offer: 'aspect-[3/2]',
+  'gallery-landscape': 'aspect-[3/2]',
+  'gallery-portrait': 'aspect-[3/4]',
+  'gallery-square': 'aspect-square',
+}[aspect];
+---
+<div
+  class:list={[
+    'relative overflow-hidden bg-gradient-to-br from-sand-300 to-olive-500/60',
+    aspectClass,
+    rounded ? 'rounded-xl' : '',
+    className,
+  ]}
+>
+  <img
+    src={fallbackSrc}
+    srcset={srcset}
+    sizes={sizes}
+    alt={alt}
+    width={fallbackWidth}
+    height={fallbackHeight}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding="async"
+    fetchpriority={priority ? 'high' : 'auto'}
+    class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 data-[loaded=true]:opacity-100"
+    data-smart-image
+  />
+</div>
+
+<script>
+  for (const img of document.querySelectorAll<HTMLImageElement>('img[data-smart-image]')) {
+    if (img.complete && img.naturalWidth > 0) {
+      img.dataset.loaded = 'true';
+    } else {
+      img.addEventListener('load', () => (img.dataset.loaded = 'true'), { once: true });
+      img.addEventListener('error', () => (img.dataset.loaded = 'true'), { once: true });
+    }
+  }
+</script>
