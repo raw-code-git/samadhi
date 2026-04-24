@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/layout/Container.astro';
+import Section from '../../components/layout/Section.astro';
+import SmartImage from '../../components/media/SmartImage.astro';
+import Lightbox from '../../components/media/Lightbox.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { breadcrumbLD } from '../../lib/jsonld';
+import { buildImageUrl } from '../../lib/images';
+
+const galleryCol = await getCollection('gallery');
+const properties = await getCollection('properties');
+const images = galleryCol[0].data.images;
+
+const propertyMap = new Map(properties.map((p) => [p.slug, p.data.name]));
+const chips = [{ id: 'all', label: 'All' }, ...properties
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p) => ({ id: p.slug, label: p.data.name }))];
+
+const aspectForOrientation = (o: string) =>
+  o === 'portrait' ? 'gallery-portrait' : o === 'square' ? 'gallery-square' : 'gallery-landscape';
+---
+<BaseLayout
+  title="Gallery"
+  description="A visual diary of Samadhi Retreats across Kuala Lumpur and Tioman Island — rooms, gardens, rainforest, food, light."
+>
+  <Fragment slot="head">
+    <JsonLd data={breadcrumbLD([{ name: 'Home', href: '/' }, { name: 'Gallery', href: '/gallery' }])} />
+  </Fragment>
+
+  <Section tone="cream">
+    <Container>
+      <div class="max-w-prose-wide">
+        <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Gallery</p>
+        <h1 class="text-display-xl font-display">A visual diary.</h1>
+        <p class="mt-5 text-lg text-forest-700">Photographs from the houses, the kitchens, the rainforest. Tap an image to view it larger.</p>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-2 items-center" role="tablist" aria-label="Filter by property">
+        {chips.map((chip) => (
+          <button
+            type="button"
+            role="tab"
+            data-gallery-chip={chip.id}
+            aria-selected={chip.id === 'all' ? 'true' : 'false'}
+            class="text-xs uppercase tracking-wider px-4 py-2 rounded-full border border-forest-900/20 hover:bg-forest-900 hover:text-sand-50 transition-colors aria-selected:bg-forest-900 aria-selected:text-sand-50"
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="cream" class="pt-0">
+    <Container>
+      <div id="gallery-grid" class="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {images.map((img, i) => {
+          const full = buildImageUrl(img.src, img.source, 1600, 1067);
+          return (
+            <a
+              href={full}
+              id={img.id}
+              data-gallery-item
+              data-property={img.property.id}
+              data-lightbox-trigger
+              data-lightbox-id={img.id}
+              data-lightbox-src={full}
+              data-lightbox-alt={img.alt}
+              class="block focus-visible:outline-gold-400"
+              aria-label={`${img.alt} — open larger`}
+            >
+              <SmartImage
+                src={img.src}
+                alt={img.alt}
+                source={img.source}
+                variant="gallery"
+                aspect={aspectForOrientation(img.orientation)}
+                priority={i < 6}
+              />
+              <span class="sr-only">{propertyMap.get(img.property.id) ?? ''}</span>
+            </a>
+          );
+        })}
+      </div>
+    </Container>
+  </Section>
+
+  <Lightbox />
+
+  <script>
+    const grid = document.getElementById('gallery-grid');
+    const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-gallery-chip]'));
+    const items = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-gallery-item]'));
+
+    function applyFilter(property: string) {
+      for (const el of items) {
+        const match = property === 'all' || el.dataset.property === property;
+        el.style.display = match ? '' : 'none';
+      }
+      for (const c of chips) {
+        c.setAttribute('aria-selected', c.dataset.galleryChip === property ? 'true' : 'false');
+      }
+      const url = new URL(window.location.href);
+      if (property === 'all') url.searchParams.delete('property');
+      else url.searchParams.set('property', property);
+      history.replaceState(null, '', url.toString());
+    }
+
+    for (const c of chips) {
+      c.addEventListener('click', () => applyFilter(c.dataset.galleryChip ?? 'all'));
+    }
+
+    const initial = new URLSearchParams(window.location.search).get('property');
+    if (initial && chips.some((c) => c.dataset.galleryChip === initial)) applyFilter(initial);
+  </script>
+</BaseLayout>

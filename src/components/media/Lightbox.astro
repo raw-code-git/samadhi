@@ -1,0 +1,126 @@
+---
+/*
+  Progressive-enhancement lightbox.
+  Without JS, every thumbnail is a plain anchor to #image-id; the image
+  is visible in-grid. With JS, the anchor opens a modal that reads
+  data-* attrs from the clicked <a> to build a larger <img>.
+*/
+---
+<div
+  id="lightbox"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image viewer"
+  aria-hidden="true"
+  class="fixed inset-0 z-50 hidden data-[open=true]:flex items-center justify-center bg-forest-900/95 backdrop-blur-sm"
+  data-open="false"
+>
+  <button
+    type="button"
+    id="lightbox-close"
+    aria-label="Close viewer"
+    class="absolute top-4 right-4 h-11 w-11 grid place-items-center rounded-full bg-forest-900/60 text-sand-50 hover:bg-forest-900 focus-visible:outline-gold-400"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+  </button>
+  <button
+    type="button"
+    id="lightbox-prev"
+    aria-label="Previous image"
+    class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-14 sm:w-14 grid place-items-center rounded-full bg-forest-900/60 text-sand-50 hover:bg-forest-900 focus-visible:outline-gold-400"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button
+    type="button"
+    id="lightbox-next"
+    aria-label="Next image"
+    class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-14 sm:w-14 grid place-items-center rounded-full bg-forest-900/60 text-sand-50 hover:bg-forest-900 focus-visible:outline-gold-400"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+
+  <figure class="max-w-[92vw] max-h-[85svh] flex flex-col items-center gap-3">
+    <img id="lightbox-image" src="" alt="" class="max-w-full max-h-[78svh] object-contain rounded" />
+    <figcaption id="lightbox-caption" class="text-sand-50/80 text-sm text-center max-w-prose"></figcaption>
+  </figure>
+</div>
+
+<script>
+  const box = document.getElementById('lightbox') as HTMLDivElement | null;
+  const img = document.getElementById('lightbox-image') as HTMLImageElement | null;
+  const cap = document.getElementById('lightbox-caption') as HTMLElement | null;
+  const closeBtn = document.getElementById('lightbox-close');
+  const prevBtn = document.getElementById('lightbox-prev');
+  const nextBtn = document.getElementById('lightbox-next');
+
+  if (!box || !img || !cap) {
+    // lightbox not on this page; abort
+  } else {
+    let triggers: HTMLAnchorElement[] = [];
+    let idx = 0;
+    let lastFocus: HTMLElement | null = null;
+
+    function refreshTriggers() {
+      triggers = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox-trigger]'));
+    }
+
+    function show(i: number) {
+      if (!triggers.length) return;
+      idx = (i + triggers.length) % triggers.length;
+      const t = triggers[idx];
+      const full = t.dataset.lightboxSrc ?? t.href;
+      const alt = t.dataset.lightboxAlt ?? '';
+      img!.src = full;
+      img!.alt = alt;
+      cap!.textContent = alt;
+      history.replaceState(null, '', '#' + (t.dataset.lightboxId ?? ''));
+    }
+
+    function open(i: number) {
+      refreshTriggers();
+      lastFocus = document.activeElement as HTMLElement;
+      box!.dataset.open = 'true';
+      box!.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      show(i);
+      closeBtn?.focus();
+    }
+
+    function close() {
+      box!.dataset.open = 'false';
+      box!.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      img!.src = '';
+      lastFocus?.focus();
+    }
+
+    document.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest('a[data-lightbox-trigger]') as HTMLAnchorElement | null;
+      if (!a) return;
+      e.preventDefault();
+      refreshTriggers();
+      const i = triggers.indexOf(a);
+      open(i >= 0 ? i : 0);
+    });
+    closeBtn?.addEventListener('click', close);
+    prevBtn?.addEventListener('click', () => show(idx - 1));
+    nextBtn?.addEventListener('click', () => show(idx + 1));
+    document.addEventListener('keydown', (e) => {
+      if (box!.dataset.open !== 'true') return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') show(idx - 1);
+      if (e.key === 'ArrowRight') show(idx + 1);
+    });
+    box.addEventListener('click', (e) => {
+      if (e.target === box) close();
+    });
+
+    // Deep-link on load: if URL has #id matching a trigger, open it
+    if (location.hash) {
+      refreshTriggers();
+      const target = triggers.findIndex((t) => '#' + t.dataset.lightboxId === location.hash);
+      if (target >= 0) open(target);
+    }
+  }
+</script>
