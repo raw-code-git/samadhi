@@ -10,7 +10,9 @@ import DiningCard from '../components/cards/DiningCard.astro';
 import Button from '../components/ui/Button.astro';
 import Divider from '../components/ui/Divider.astro';
 import Chip from '../components/ui/Chip.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
 import { buildHero } from '../lib/images';
+import { organizationLD, websiteLD } from '../lib/jsonld';
 import { SITE_DESCRIPTION } from '../consts';
 
 const properties = await getCollection('properties');
@@ -40,6 +42,9 @@ const hero = buildHero(heroImage);
   transparentHeader
   heroPreload={hero.preload}
 >
+  <Fragment slot="head">
+    <JsonLd data={[organizationLD(), websiteLD()]} />
+  </Fragment>
   <Hero
     src={heroImage.src}
     source={heroImage.source}
