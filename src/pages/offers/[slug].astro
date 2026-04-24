@@ -1,0 +1,157 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/layout/Container.astro';
+import Section from '../../components/layout/Section.astro';
+import Hero from '../../components/media/Hero.astro';
+import Button from '../../components/ui/Button.astro';
+import Chip from '../../components/ui/Chip.astro';
+import Divider from '../../components/ui/Divider.astro';
+import PropertyCard from '../../components/cards/PropertyCard.astro';
+import BookingCTA from '../../components/booking/BookingCTA.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import Prose from '../../components/ui/Prose.astro';
+import { buildHero } from '../../lib/images';
+import { offerLD, breadcrumbLD } from '../../lib/jsonld';
+
+export async function getStaticPaths() {
+  const offers = await getCollection('offers');
+  return offers.map((offer) => ({ params: { slug: offer.slug }, props: { offer } }));
+}
+
+const { offer } = Astro.props;
+const { Content } = await offer.render();
+
+const applicableProperties = await Promise.all(offer.data.properties.map((ref) => getEntry(ref)));
+const validProperties = applicableProperties.filter((p): p is NonNullable<typeof p> => !!p);
+const firstPropertyId = validProperties[0]?.slug;
+
+const dateFmt = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' });
+
+const hero = buildHero({
+  src: offer.data.heroImage.src,
+  source: offer.data.heroImage.source,
+  alt: offer.data.heroImage.alt,
+});
+
+const bookQuery = new URLSearchParams({ offerId: offer.slug });
+if (firstPropertyId) bookQuery.set('propertyId', firstPropertyId);
+---
+<BaseLayout
+  title={offer.data.title}
+  description={offer.data.summary}
+  transparentHeader
+  heroPreload={hero.preload}
+>
+  <Fragment slot="head">
+    <JsonLd data={[
+      offerLD(offer),
+      breadcrumbLD([
+        { name: 'Home', href: '/' },
+        { name: 'Offers', href: '/offers' },
+        { name: offer.data.title, href: `/offers/${offer.slug}` },
+      ]),
+    ]} />
+  </Fragment>
+
+  <Hero
+    src={offer.data.heroImage.src}
+    source={offer.data.heroImage.source}
+    alt={offer.data.heroImage.alt}
+    eyebrow="Seasonal package"
+    title={offer.data.title}
+    subtitle={offer.data.summary}
+    overlay="strong"
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href={`/book?${bookQuery.toString()}`} variant="gold">Reserve this package</Button>
+    </div>
+  </Hero>
+
+  <Section tone="cream">
+    <Container>
+      <div class="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <Chip tone="gold">Offer</Chip>
+            <span class="text-xs uppercase tracking-wider text-forest-700/70">
+              Valid {dateFmt.format(offer.data.validFrom)} – {dateFmt.format(offer.data.validTo)}
+            </span>
+          </div>
+          <Prose><Content /></Prose>
+
+          {offer.data.inclusions.length > 0 && (
+            <div class="mt-10">
+              <h3 class="text-2xl font-display text-forest-900 mb-4">What's included</h3>
+              <ul class="space-y-2">
+                {offer.data.inclusions.map((item) => (
+                  <li class="flex gap-3 text-sm text-ink/90">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 mt-0.5 text-clay-600"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {offer.data.terms.length > 0 && (
+            <div class="mt-10">
+              <h3 class="text-2xl font-display text-forest-900 mb-4">Terms</h3>
+              <ul class="space-y-2">
+                {offer.data.terms.map((item) => (
+                  <li class="text-sm text-forest-700/90">· {item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <aside class="bg-sand-50 rounded-2xl p-6 lg:p-8 h-fit border border-forest-900/10 sticky top-24">
+          <p class="text-xs uppercase tracking-wider text-forest-700/70 mb-2">From</p>
+          <p class="text-3xl font-display text-forest-900 mb-4">
+            {offer.data.priceLabel ?? `MYR ${offer.data.priceFromMYR?.toLocaleString()}`}
+          </p>
+          <Divider />
+          <p class="text-xs uppercase tracking-wider text-forest-700/60 mb-3">Applicable at</p>
+          <ul class="space-y-2 mb-5">
+            {validProperties.map((p) => {
+              const href = p.data.type === 'resort' ? `/stays/${p.slug}` : `/dining/${p.slug}`;
+              return (
+                <li>
+                  <a href={href} class="text-sm text-forest-900 hover:text-clay-600 underline underline-offset-2 decoration-forest-900/20 hover:decoration-clay-600">
+                    {p.data.name}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+          <Button href={`/book?${bookQuery.toString()}`} variant="primary" class="w-full">Reserve</Button>
+          <p class="mt-3 text-xs text-forest-700/60 text-center">Demo booking — no real transaction.</p>
+        </aside>
+      </div>
+    </Container>
+  </Section>
+
+  {validProperties.length > 0 && (
+    <Section tone="sand">
+      <Container>
+        <div class="mb-8 max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Where</p>
+          <h2 class="text-display-lg font-display">Available at these properties.</h2>
+        </div>
+        <div class="grid gap-8 md:grid-cols-2">
+          {validProperties.map((p) => <PropertyCard property={p} />)}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  <BookingCTA
+    sticky
+    propertyId={firstPropertyId}
+    offerId={offer.slug}
+    propertyName={offer.data.title}
+    priceLabel={offer.data.priceLabel ?? (offer.data.priceFromMYR ? `from MYR ${offer.data.priceFromMYR.toLocaleString()}` : undefined)}
+    label="Reserve offer"
+  />
+</BaseLayout>

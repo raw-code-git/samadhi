@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/layout/Container.astro';
+import Section from '../../components/layout/Section.astro';
+import OfferCard from '../../components/cards/OfferCard.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { breadcrumbLD } from '../../lib/jsonld';
+
+const offers = (await getCollection('offers')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout
+  title="Offers"
+  description="Seasonal packages across Villa Samadhi, Japamala and our restaurants. Stays, dining, and experiences, bundled."
+>
+  <Fragment slot="head">
+    <JsonLd data={breadcrumbLD([{ name: 'Home', href: '/' }, { name: 'Offers', href: '/offers' }])} />
+  </Fragment>
+  <Section tone="cream">
+    <Container>
+      <div class="max-w-prose-wide">
+        <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Offers</p>
+        <h1 class="text-display-xl font-display">Seasonal packages.</h1>
+        <p class="mt-5 text-lg text-forest-700">Stays bundled with dining, dive weeks on Tioman, tasting menus at the fire counter. Each package is hand-built — we do not do bulk.</p>
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="cream">
+    <Container>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {offers.map((o) => <OfferCard offer={o} />)}
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>
