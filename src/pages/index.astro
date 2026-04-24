@@ -1,18 +1,31 @@
 ---
-import '../styles/globals.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Section from '../components/layout/Section.astro';
+import Button from '../components/ui/Button.astro';
+import Divider from '../components/ui/Divider.astro';
 ---
+<BaseLayout title="Home">
+  <Section tone="cream">
+    <Container>
+      <p class="text-xs uppercase tracking-[0.2em] text-clay-600">Design system preview</p>
+      <h1 class="text-display-xl mt-4 max-w-4xl">A quiet collection of resorts and restaurants.</h1>
+      <p class="mt-6 max-w-prose-wide text-lg text-forest-700">
+        The real homepage is coming in the next commit. This is the base layout with the new header, footer and mobile drawer wired up so the design system is verifiable in isolation.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href="/stays" variant="primary">Explore stays</Button>
+        <Button href="/dining" variant="outline">Our restaurants</Button>
+        <Button href="/book" variant="gold" size="sm">Reserve</Button>
+      </div>
+    </Container>
+  </Section>
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Samadhi Retreats — scaffold</title>
-  </head>
-  <body>
-    <main class="container-x section-y">
-      <h1 class="text-display-xl">Samadhi Retreats</h1>
-      <p class="mt-4 text-forest-700">Scaffold online. Full site coming online in subsequent commits.</p>
-    </main>
-  </body>
-</html>
+  <Section tone="sand">
+    <Container>
+      <h2 class="text-display-lg">Typography</h2>
+      <Divider />
+      <p class="text-base max-w-prose-wide">Body text uses Inter Variable at a comfortable reading size. Display headings use Cormorant for an unhurried, editorial feel — the kind of rhythm you'd find in a well-printed magazine.</p>
+    </Container>
+  </Section>
+</BaseLayout>

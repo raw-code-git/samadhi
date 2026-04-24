@@ -1,0 +1,21 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class:list={[
+  'prose-custom max-w-prose-wide',
+  className,
+]}>
+  <slot />
+</div>
+
+<style>
+  .prose-custom :global(p) { margin-block: 0.9em; line-height: 1.7; }
+  .prose-custom :global(h2) { font-family: Cormorant, serif; font-size: 2rem; margin-top: 1.8em; margin-bottom: 0.4em; line-height: 1.15; }
+  .prose-custom :global(h3) { font-family: Cormorant, serif; font-size: 1.4rem; margin-top: 1.4em; margin-bottom: 0.3em; }
+  .prose-custom :global(a) { color: rgb(140 58 34); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .prose-custom :global(ul) { padding-left: 1.25em; list-style: disc; }
+  .prose-custom :global(li) { margin-block: 0.3em; }
+</style>

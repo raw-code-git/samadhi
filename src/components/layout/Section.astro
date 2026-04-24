@@ -1,0 +1,18 @@
+---
+interface Props {
+  as?: string;
+  tone?: 'cream' | 'sand' | 'forest' | 'transparent';
+  class?: string;
+  id?: string;
+}
+const { as: Tag = 'section', tone = 'transparent', class: className = '', id } = Astro.props;
+const toneClass = {
+  cream: 'bg-cream text-ink',
+  sand: 'bg-sand-50 text-ink',
+  forest: 'bg-forest-900 text-sand-50',
+  transparent: '',
+}[tone];
+---
+<Tag id={id} class:list={['section-y', toneClass, className]}>
+  <slot />
+</Tag>

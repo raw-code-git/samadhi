@@ -1,0 +1,60 @@
+---
+import { PRIMARY_NAV } from '../../data/nav';
+import NavLink from './NavLink.astro';
+import MobileDrawer from './MobileDrawer.astro';
+import Button from '../ui/Button.astro';
+
+interface Props {
+  transparent?: boolean;
+}
+const { transparent = false } = Astro.props;
+---
+<header
+  data-transparent={transparent ? 'true' : 'false'}
+  class="sticky top-0 z-40 backdrop-blur-md transition-colors duration-300 data-[transparent=true]:bg-cream/0 bg-cream/90 data-[scrolled=true]:bg-cream/95 border-b border-forest-900/0 data-[scrolled=true]:border-forest-900/10"
+  id="site-header"
+>
+  <div class="mx-auto max-w-container flex items-center justify-between px-5 sm:px-8 lg:px-12 h-16 lg:h-20">
+    <a href="/" class="flex items-center gap-3 group" aria-label="Samadhi Retreats home">
+      <svg viewBox="0 0 32 32" width="28" height="28" class="shrink-0">
+        <rect width="32" height="32" rx="6" fill="#1B2E24"/>
+        <text x="16" y="22" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="20" fill="#C9A24A">S</text>
+      </svg>
+      <span class="font-display text-xl lg:text-2xl text-forest-900 group-hover:text-clay-600 transition-colors">Samadhi</span>
+    </a>
+    <nav aria-label="Primary" class="hidden lg:flex items-center gap-8">
+      {PRIMARY_NAV.map((item) => (
+        <NavLink href={item.href}>{item.label}</NavLink>
+      ))}
+    </nav>
+    <div class="flex items-center gap-2">
+      <div class="hidden lg:block">
+        <Button href="/book" variant="primary" size="sm">Reserve</Button>
+      </div>
+      <button
+        type="button"
+        id="mobile-drawer-open"
+        aria-label="Open menu"
+        aria-controls="mobile-drawer"
+        aria-expanded="false"
+        class="lg:hidden h-11 w-11 grid place-items-center rounded-full text-forest-900 hover:bg-sand-100"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<MobileDrawer />
+
+<script>
+  const header = document.getElementById('site-header');
+  function onScroll() {
+    if (!header) return;
+    header.dataset.scrolled = window.scrollY > 8 ? 'true' : 'false';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

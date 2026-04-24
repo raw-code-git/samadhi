@@ -1,0 +1,39 @@
+---
+import { FOOTER_SECTIONS } from '../../data/nav';
+import { SITE_NAME, SITE_TAGLINE } from '../../consts';
+import Divider from '../ui/Divider.astro';
+---
+<footer class="bg-forest-900 text-sand-50">
+  <div class="mx-auto max-w-container px-5 sm:px-8 lg:px-12 py-16 lg:py-20">
+    <div class="grid gap-10 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
+      <div>
+        <div class="flex items-center gap-3">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <rect width="32" height="32" rx="6" fill="#FAF5EC"/>
+            <text x="16" y="22" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="20" fill="#1B2E24">S</text>
+          </svg>
+          <span class="font-display text-2xl">{SITE_NAME}</span>
+        </div>
+        <p class="mt-4 max-w-sm text-sand-50/80 text-sm leading-relaxed">{SITE_TAGLINE}</p>
+        <p class="mt-6 text-xs uppercase tracking-widest text-gold-500">Kuala Lumpur · Tioman Island</p>
+      </div>
+      {FOOTER_SECTIONS.map((section) => (
+        <div>
+          <h3 class="font-display text-lg text-sand-50 mb-4">{section.title}</h3>
+          <ul class="space-y-2">
+            {section.links.map((link) => (
+              <li>
+                <a href={link.href} class="text-sm text-sand-50/80 hover:text-gold-400 transition-colors">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+    <Divider class="my-10 opacity-50" />
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-sand-50/60">
+      <p>&copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.</p>
+      <p class="italic">Demo site — imagery courtesy of Unsplash contributors.</p>
+    </div>
+  </div>
+</footer>

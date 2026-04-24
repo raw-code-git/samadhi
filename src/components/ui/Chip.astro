@@ -1,0 +1,19 @@
+---
+interface Props {
+  tone?: 'default' | 'gold' | 'forest';
+  class?: string;
+}
+const { tone = 'default', class: className = '' } = Astro.props;
+const tones = {
+  default: 'bg-sand-100 text-forest-900 border-forest-900/10',
+  gold: 'bg-gold-500/15 text-gold-500 border-gold-500/30',
+  forest: 'bg-forest-900 text-sand-50 border-forest-900',
+};
+---
+<span class:list={[
+  'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium tracking-wide uppercase',
+  tones[tone],
+  className,
+]}>
+  <slot />
+</span>

@@ -1,0 +1,45 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'ghost' | 'gold' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  disabled?: boolean;
+  ariaLabel?: string;
+  dataPropertyId?: string;
+}
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  class: className = '',
+  disabled,
+  ariaLabel,
+  dataPropertyId,
+} = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 rounded-full font-sans font-medium tracking-wide transition-colors duration-200 min-h-11 disabled:opacity-50 disabled:cursor-not-allowed';
+
+const variants = {
+  primary: 'bg-clay-600 text-cream hover:bg-clay-500',
+  ghost: 'bg-transparent text-forest-900 hover:bg-sand-100',
+  gold: 'bg-gold-500 text-forest-900 hover:bg-gold-400',
+  outline: 'border border-forest-900/30 text-forest-900 hover:bg-forest-900 hover:text-cream',
+};
+
+const sizes = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-6 py-3 text-base',
+  lg: 'px-8 py-4 text-base',
+};
+
+const cls = [base, variants[variant], sizes[size], className];
+---
+{href ? (
+  <a href={href} class:list={cls} aria-label={ariaLabel} data-property-id={dataPropertyId}><slot /></a>
+) : (
+  <button type={type} disabled={disabled} class:list={cls} aria-label={ariaLabel} data-property-id={dataPropertyId}><slot /></button>
+)}

@@ -1,0 +1,76 @@
+---
+import { PRIMARY_NAV } from '../../data/nav';
+import Button from '../ui/Button.astro';
+---
+<div
+  id="mobile-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="mobile-drawer-title"
+  aria-hidden="true"
+  class="fixed inset-0 z-50 hidden data-[open=true]:flex flex-col bg-cream"
+  data-open="false"
+>
+  <div class="flex items-center justify-between px-5 py-5 border-b border-forest-900/10">
+    <span id="mobile-drawer-title" class="font-display text-2xl text-forest-900">Samadhi</span>
+    <button
+      type="button"
+      id="mobile-drawer-close"
+      aria-label="Close menu"
+      class="h-11 w-11 grid place-items-center rounded-full text-forest-900 hover:bg-sand-100"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+    </button>
+  </div>
+  <nav class="flex-1 overflow-y-auto">
+    <ul class="flex flex-col divide-y divide-forest-900/10">
+      {PRIMARY_NAV.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class="flex items-baseline justify-between px-5 py-5 hover:bg-sand-100"
+          >
+            <span class="font-display text-3xl text-forest-900">{item.label}</span>
+            {item.description && <span class="text-xs uppercase tracking-wider text-forest-700/60">{item.description}</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <div class="px-5 py-5 border-t border-forest-900/10">
+    <Button href="/book" variant="primary" class="w-full">Reserve your stay</Button>
+  </div>
+</div>
+
+<script>
+  const drawer = document.getElementById('mobile-drawer');
+  const closeBtn = document.getElementById('mobile-drawer-close');
+  const openBtn = document.getElementById('mobile-drawer-open');
+  let lastFocus: HTMLElement | null = null;
+
+  function open() {
+    if (!drawer) return;
+    lastFocus = document.activeElement as HTMLElement;
+    drawer.dataset.open = 'true';
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    closeBtn?.focus();
+  }
+  function close() {
+    if (!drawer) return;
+    drawer.dataset.open = 'false';
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocus?.focus();
+  }
+
+  openBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  drawer?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'A') close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer?.dataset.open === 'true') close();
+  });
+</script>
