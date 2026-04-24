@@ -1,0 +1,220 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/layout/Container.astro';
+import Section from '../../components/layout/Section.astro';
+import Hero from '../../components/media/Hero.astro';
+import SmartImage from '../../components/media/SmartImage.astro';
+import Button from '../../components/ui/Button.astro';
+import Divider from '../../components/ui/Divider.astro';
+import Chip from '../../components/ui/Chip.astro';
+import DiningCard from '../../components/cards/DiningCard.astro';
+import OfferCard from '../../components/cards/OfferCard.astro';
+import BookingCTA from '../../components/booking/BookingCTA.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import Prose from '../../components/ui/Prose.astro';
+import { buildHero } from '../../lib/images';
+import { lodgingBusinessLD, breadcrumbLD } from '../../lib/jsonld';
+
+export async function getStaticPaths() {
+  const properties = await getCollection('properties', ({ data }) => data.type === 'resort');
+  return properties.map((p) => ({ params: { slug: p.slug }, props: { property: p } }));
+}
+
+const { property } = Astro.props;
+const { Content } = await property.render();
+
+const allProperties = await getCollection('properties');
+const allOffers = await getCollection('offers');
+const galleryCol = await getCollection('gallery');
+
+const childDining = allProperties.filter(
+  (p) => p.data.type === 'dining' && p.data.partOf?.id === property.slug,
+);
+
+const relatedOffers = allOffers.filter((o) =>
+  o.data.properties.some((ref) => ref.id === property.slug),
+);
+
+const galleryImages = galleryCol[0].data.images
+  .filter((img) => img.property.id === property.slug)
+  .slice(0, 6);
+
+const hero = buildHero({
+  src: property.data.heroImage.src,
+  source: property.data.heroImage.source,
+  alt: property.data.heroImage.alt,
+});
+
+const relatedDiningEntries = await Promise.all(
+  property.data.related.map((ref) => getEntry(ref)),
+);
+const crossLinkedDining = [
+  ...childDining,
+  ...relatedDiningEntries.filter(
+    (entry): entry is NonNullable<typeof entry> =>
+      !!entry && entry.data.type === 'dining' && !childDining.some((c) => c.slug === entry.slug),
+  ),
+];
+---
+<BaseLayout
+  title={property.data.name}
+  description={property.data.shortDescription}
+  transparentHeader
+  heroPreload={hero.preload}
+>
+  <Fragment slot="head">
+    <JsonLd data={[
+      lodgingBusinessLD(property),
+      breadcrumbLD([
+        { name: 'Home', href: '/' },
+        { name: 'Stays', href: '/stays' },
+        { name: property.data.name, href: `/stays/${property.slug}` },
+      ]),
+    ]} />
+  </Fragment>
+
+  <Hero
+    src={property.data.heroImage.src}
+    source={property.data.heroImage.source}
+    alt={property.data.heroImage.alt}
+    eyebrow={`${property.data.location.city} · ${property.data.location.country}`}
+    title={property.data.name}
+    subtitle={property.data.tagline}
+    overlay="strong"
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href={`/book?propertyId=${property.slug}`} variant="primary">Reserve</Button>
+      <Button href="#rooms" variant="outline" class="border-sand-50/40 text-sand-50 hover:bg-sand-50 hover:text-forest-900">See the rooms</Button>
+    </div>
+  </Hero>
+
+  <Section tone="cream">
+    <Container>
+      <div class="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">The resort</p>
+          <h2 class="text-display-lg font-display mb-6">{property.data.tagline}</h2>
+          <Prose><Content /></Prose>
+        </div>
+        <aside class="bg-sand-50 rounded-2xl p-6 lg:p-8 h-fit border border-forest-900/10">
+          <p class="text-xs uppercase tracking-wider text-forest-700/70 mb-4">At a glance</p>
+          <ul class="space-y-3">
+            {property.data.features.map((f) => (
+              <li class="flex gap-3 text-sm text-ink/90">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 mt-0.5 text-clay-600"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <Divider />
+          <p class="text-sm text-forest-700/90">{property.data.location.address}</p>
+          {property.data.phone && <p class="text-sm text-forest-700/90 mt-1">{property.data.phone}</p>}
+        </aside>
+      </div>
+    </Container>
+  </Section>
+
+  {property.data.rooms.length > 0 && (
+    <Section tone="sand" id="rooms">
+      <Container>
+        <div class="mb-10 max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">The rooms</p>
+          <h2 class="text-display-lg font-display">Built from the floor up, room by room.</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          {property.data.rooms.map((room) => (
+            <article class="bg-cream rounded-xl p-6 border border-forest-900/10">
+              <h3 class="text-2xl font-display text-forest-900">{room.name}</h3>
+              <p class="mt-2 text-sm text-forest-700/90">{room.beds}</p>
+              <div class="mt-4 flex items-baseline justify-between">
+                <span class="text-xs uppercase tracking-wider text-forest-700/60">
+                  {room.sizeSqm ? `${room.sizeSqm} sqm` : ''}
+                </span>
+                {room.priceFromMYR && (
+                  <span class="text-sm font-medium text-clay-600">from MYR {room.priceFromMYR.toLocaleString()}</span>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {galleryImages.length > 0 && (
+    <Section tone="cream">
+      <Container>
+        <div class="flex items-end justify-between gap-6 mb-8">
+          <div>
+            <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Photographs</p>
+            <h2 class="text-display-lg font-display">A visual diary.</h2>
+          </div>
+          <Button href={`/gallery?property=${property.slug}`} variant="outline" size="sm">View all</Button>
+        </div>
+        <div class="grid gap-3 grid-cols-2 md:grid-cols-3">
+          {galleryImages.map((img) => (
+            <a href={`/gallery?property=${property.slug}#${img.id}`} class="block">
+              <SmartImage
+                src={img.src}
+                alt={img.alt}
+                source={img.source}
+                variant="gallery"
+                aspect={img.orientation === 'portrait' ? 'gallery-portrait' : img.orientation === 'square' ? 'gallery-square' : 'gallery-landscape'}
+              />
+            </a>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {crossLinkedDining.length > 0 && (
+    <Section tone="sand">
+      <Container>
+        <div class="mb-8 max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Eat with us</p>
+          <h2 class="text-display-lg font-display">Our restaurants at {property.data.name}.</h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {crossLinkedDining.map((d) => <DiningCard property={d} />)}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {relatedOffers.length > 0 && (
+    <Section tone="cream">
+      <Container>
+        <div class="mb-8 max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Packages</p>
+          <h2 class="text-display-lg font-display">Offers for {property.data.name}.</h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {relatedOffers.map((o) => <OfferCard offer={o} />)}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  <Section tone="forest">
+    <Container narrow>
+      <div class="text-center">
+        <Chip tone="gold">Reserve</Chip>
+        <h2 class="mt-4 text-display-lg font-display text-sand-50">Stay with us at {property.data.name}.</h2>
+        <p class="mt-4 text-sand-50/80 max-w-prose-wide mx-auto">Bookings go through our in-house reservations team. We hold rooms for 24 hours while you decide.</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <Button href={`/book?propertyId=${property.slug}`} variant="gold">Reserve your stay</Button>
+          <Button href="/contact" variant="outline" class="border-sand-50/30 text-sand-50 hover:bg-sand-50 hover:text-forest-900">Enquire</Button>
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  <BookingCTA
+    sticky
+    propertyId={property.slug}
+    propertyName={property.data.name}
+    priceLabel={property.data.rooms[0]?.priceFromMYR ? `from MYR ${property.data.rooms[0].priceFromMYR.toLocaleString()}` : undefined}
+  />
+</BaseLayout>

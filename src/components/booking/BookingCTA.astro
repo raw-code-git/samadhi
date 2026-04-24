@@ -1,0 +1,63 @@
+---
+import Button from '../ui/Button.astro';
+
+interface Props {
+  propertyId?: string;
+  offerId?: string;
+  label?: string;
+  sticky?: boolean;
+  priceLabel?: string;
+  propertyName?: string;
+}
+const {
+  propertyId,
+  offerId,
+  label = 'Reserve',
+  sticky = false,
+  priceLabel,
+  propertyName,
+} = Astro.props;
+
+const qs = new URLSearchParams();
+if (propertyId) qs.set('propertyId', propertyId);
+if (offerId) qs.set('offerId', offerId);
+const href = `/book${qs.toString() ? `?${qs.toString()}` : ''}`;
+---
+{sticky ? (
+  <div
+    id="sticky-booking-cta"
+    class="md:hidden fixed inset-x-0 bottom-0 z-30 bg-cream/95 backdrop-blur-md border-t border-forest-900/10 transition-transform duration-200 data-[hidden=true]:translate-y-full"
+    style="padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem); padding-top: 0.75rem; padding-left: 1rem; padding-right: 1rem;"
+    data-hidden="false"
+  >
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        {propertyName && <p class="text-xs uppercase tracking-wider text-forest-700/70 truncate">{propertyName}</p>}
+        {priceLabel && <p class="text-sm font-medium text-forest-900 truncate">{priceLabel}</p>}
+      </div>
+      <Button href={href} variant="primary" size="md">{label}</Button>
+    </div>
+  </div>
+
+  <script>
+    const el = document.getElementById('sticky-booking-cta');
+    if (el) {
+      let lastY = window.scrollY;
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          const goingDown = y > lastY && y > 80;
+          el.dataset.hidden = goingDown ? 'true' : 'false';
+          lastY = y;
+          ticking = false;
+        });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+  </script>
+) : (
+  <Button href={href} variant="primary">{label}</Button>
+)}
