@@ -1,31 +1,160 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Container from '../components/layout/Container.astro';
 import Section from '../components/layout/Section.astro';
+import Hero from '../components/media/Hero.astro';
+import SmartImage from '../components/media/SmartImage.astro';
+import PropertyCard from '../components/cards/PropertyCard.astro';
+import DiningCard from '../components/cards/DiningCard.astro';
 import Button from '../components/ui/Button.astro';
 import Divider from '../components/ui/Divider.astro';
+import Chip from '../components/ui/Chip.astro';
+import { buildHero } from '../lib/images';
+import { SITE_DESCRIPTION } from '../consts';
+
+const properties = await getCollection('properties');
+const offers = await getCollection('offers');
+const galleryData = await getCollection('gallery');
+
+const stays = properties
+  .filter((p) => p.data.type === 'resort')
+  .sort((a, b) => a.data.order - b.data.order);
+
+const dining = properties
+  .filter((p) => p.data.type === 'dining')
+  .sort((a, b) => a.data.order - b.data.order);
+
+const featuredDining = dining.filter((d) => d.data.featured);
+const featuredOffers = offers.filter((o) => o.data.featured).sort((a, b) => a.data.order - b.data.order);
+const featuredOffer = featuredOffers[0];
+
+const galleryImages = galleryData[0].data.images.filter((g) => g.featured).slice(0, 6);
+
+const heroImage = { src: 'home-hero-samadhi', source: 'picsum' as const, alt: 'Lantern-lit courtyard pool at dusk' };
+const hero = buildHero(heroImage);
 ---
-<BaseLayout title="Home">
+<BaseLayout
+  title={undefined}
+  description={SITE_DESCRIPTION}
+  transparentHeader
+  heroPreload={hero.preload}
+>
+  <Hero
+    src={heroImage.src}
+    source={heroImage.source}
+    alt={heroImage.alt}
+    eyebrow="Samadhi Retreats"
+    title="A quiet collection of places to stay and eat."
+    subtitle="Two boutique resorts and five restaurants across Kuala Lumpur and Tioman Island — built slowly, by hand, rooted in place."
+    overlay="strong"
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href="/stays" variant="primary">Find a stay</Button>
+      <Button href="/dining" variant="gold">Our restaurants</Button>
+    </div>
+  </Hero>
+
+  <Section tone="cream" id="stays">
+    <Container>
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        <div class="max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Where to stay</p>
+          <h2 class="text-display-lg font-display">Two resorts, two very different silences.</h2>
+          <p class="mt-4 text-forest-700">One hidden in the middle of Kuala Lumpur, the other on an eleven-acre shelf of rainforest that falls into the South China Sea.</p>
+        </div>
+        <Button href="/stays" variant="outline" size="sm">All stays</Button>
+      </div>
+      <div class="grid gap-8 md:grid-cols-2">
+        {stays.map((p) => <PropertyCard property={p} />)}
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="sand" id="dining">
+    <Container>
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        <div class="max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Where to dine</p>
+          <h2 class="text-display-lg font-display">Five restaurants that stand on their own.</h2>
+          <p class="mt-4 text-forest-700">Northern Thai cooking in a pre-war bungalow. Cambodian curries by a rainforest ravine. Dim sum by the river. Fish cooked in banana leaf on a cliff. Pizza on the sand.</p>
+        </div>
+        <Button href="/dining" variant="outline" size="sm">All restaurants</Button>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {featuredDining.map((d) => <DiningCard property={d} />)}
+      </div>
+    </Container>
+  </Section>
+
+  {featuredOffer && (
+    <Section tone="forest">
+      <Container>
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <Chip tone="gold">Seasonal offer</Chip>
+            <h2 class="mt-4 text-display-lg font-display text-sand-50">{featuredOffer.data.title}</h2>
+            <p class="mt-4 text-sand-50/80 max-w-prose-wide">{featuredOffer.data.summary}</p>
+            <p class="mt-6 text-gold-400 text-sm tracking-wide">
+              {featuredOffer.data.priceLabel ?? `from MYR ${featuredOffer.data.priceFromMYR?.toLocaleString()}`}
+            </p>
+            <div class="mt-8 flex gap-3">
+              <Button href={`/offers/${featuredOffer.slug}`} variant="gold">See the package</Button>
+              <Button href="/offers" variant="outline" class="border-sand-50/30 text-sand-50 hover:bg-sand-50 hover:text-forest-900">All offers</Button>
+            </div>
+          </div>
+          <div>
+            <SmartImage
+              src={featuredOffer.data.heroImage.src}
+              alt={featuredOffer.data.heroImage.alt}
+              source={featuredOffer.data.heroImage.source}
+              variant="card"
+              aspect="offer"
+            />
+          </div>
+        </div>
+      </Container>
+    </Section>
+  )}
+
   <Section tone="cream">
     <Container>
-      <p class="text-xs uppercase tracking-[0.2em] text-clay-600">Design system preview</p>
-      <h1 class="text-display-xl mt-4 max-w-4xl">A quiet collection of resorts and restaurants.</h1>
-      <p class="mt-6 max-w-prose-wide text-lg text-forest-700">
-        The real homepage is coming in the next commit. This is the base layout with the new header, footer and mobile drawer wired up so the design system is verifiable in isolation.
-      </p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <Button href="/stays" variant="primary">Explore stays</Button>
-        <Button href="/dining" variant="outline">Our restaurants</Button>
-        <Button href="/book" variant="gold" size="sm">Reserve</Button>
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+        <div>
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Gallery</p>
+          <h2 class="text-display-lg font-display">A visual diary.</h2>
+        </div>
+        <Button href="/gallery" variant="outline" size="sm">View full gallery</Button>
+      </div>
+      <div class="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        {galleryImages.map((img) => (
+          <a href={`/gallery#${img.id}`} class="block">
+            <SmartImage
+              src={img.src}
+              alt={img.alt}
+              source={img.source}
+              variant="gallery"
+              aspect={img.orientation === 'portrait' ? 'gallery-portrait' : img.orientation === 'square' ? 'gallery-square' : 'gallery-landscape'}
+            />
+          </a>
+        ))}
       </div>
     </Container>
   </Section>
 
   <Section tone="sand">
-    <Container>
-      <h2 class="text-display-lg">Typography</h2>
+    <Container narrow>
       <Divider />
-      <p class="text-base max-w-prose-wide">Body text uses Inter Variable at a comfortable reading size. Display headings use Cormorant for an unhurried, editorial feel — the kind of rhythm you'd find in a well-printed magazine.</p>
+      <div class="text-center">
+        <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Our philosophy</p>
+        <h2 class="text-display-lg font-display">Small places, done with care.</h2>
+        <p class="mt-5 text-forest-700 leading-relaxed">
+          Samadhi Retreats has built a small collection of resorts and restaurants since 1999, each one made slowly, with local craftspeople, in a language of place. We do not run chains. We run houses — and a handful of kitchens that belong to them.
+        </p>
+        <div class="mt-8">
+          <Button href="/about" variant="ghost">Read more about us</Button>
+        </div>
+      </div>
     </Container>
   </Section>
 </BaseLayout>

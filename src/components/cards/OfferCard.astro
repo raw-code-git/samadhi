@@ -1,0 +1,43 @@
+---
+import SmartImage from '../media/SmartImage.astro';
+import Chip from '../ui/Chip.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  offer: CollectionEntry<'offers'>;
+}
+const { offer } = Astro.props;
+const { title, summary, priceLabel, priceFromMYR, cardImage, properties } = offer.data;
+const href = `/offers/${offer.slug}`;
+---
+<article class="group overflow-hidden rounded-2xl bg-sand-50 border border-forest-900/10 hover:shadow-card transition-shadow duration-300">
+  <a href={href} class="block" aria-label={`See offer: ${title}`}>
+    <SmartImage
+      src={cardImage.src}
+      alt={cardImage.alt}
+      source={cardImage.source}
+      variant="card"
+      aspect="offer"
+      rounded={false}
+    />
+  </a>
+  <div class="p-6">
+    <div class="flex items-center gap-2 mb-3">
+      <Chip tone="forest">Offer</Chip>
+      <span class="text-xs text-forest-700/70">{properties.length} {properties.length === 1 ? 'property' : 'properties'}</span>
+    </div>
+    <h3 class="text-2xl font-display text-forest-900 mb-2">
+      <a href={href} class="hover:text-clay-600 transition-colors">{title}</a>
+    </h3>
+    <p class="text-sm text-ink/80 leading-relaxed mb-4">{summary}</p>
+    <div class="flex items-center justify-between">
+      <span class="text-sm font-medium text-clay-600">
+        {priceLabel ?? (priceFromMYR ? `from MYR ${priceFromMYR.toLocaleString()}` : 'Enquire')}
+      </span>
+      <a href={href} class="text-sm text-forest-900 font-medium inline-flex items-center gap-1 group-hover:text-clay-600 transition-colors">
+        Details
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</article>
