@@ -1,0 +1,46 @@
+{
+  "images": [
+    { "id": "vs-1", "src": "vs-gallery-1", "alt": "Lantern-lit courtyard pool at Villa Samadhi", "property": "villa-samadhi", "tags": ["pool", "exterior"], "orientation": "landscape", "featured": true },
+    { "id": "vs-2", "src": "vs-gallery-2", "alt": "Thatched-roof suite at dusk", "property": "villa-samadhi", "tags": ["architecture", "exterior"], "orientation": "portrait" },
+    { "id": "vs-3", "src": "vs-gallery-3", "alt": "Teak outdoor bathtub on private terrace", "property": "villa-samadhi", "tags": ["interior", "bathroom"], "orientation": "portrait" },
+    { "id": "vs-4", "src": "vs-gallery-4", "alt": "King-size bed with carved headboard", "property": "villa-samadhi", "tags": ["interior", "suite"], "orientation": "landscape" },
+    { "id": "vs-5", "src": "vs-gallery-5", "alt": "Sundown canapés in the lounge", "property": "villa-samadhi", "tags": ["dining", "interior"], "orientation": "landscape" },
+    { "id": "vs-6", "src": "vs-gallery-6", "alt": "Oil lanterns in the walled garden", "property": "villa-samadhi", "tags": ["garden", "evening"], "orientation": "square" },
+    { "id": "vs-7", "src": "vs-gallery-7", "alt": "Breakfast laid out on the verandah", "property": "villa-samadhi", "tags": ["dining"], "orientation": "landscape" },
+    { "id": "vs-8", "src": "vs-gallery-8", "alt": "Carved timber colonnade along the pool", "property": "villa-samadhi", "tags": ["architecture"], "orientation": "portrait" },
+
+    { "id": "jm-1", "src": "jm-gallery-1", "alt": "Cliffside infinity pool looking over the South China Sea", "property": "japamala", "tags": ["pool", "view"], "orientation": "landscape", "featured": true },
+    { "id": "jm-2", "src": "jm-gallery-2", "alt": "Treetop chalet in the rainforest canopy", "property": "japamala", "tags": ["architecture"], "orientation": "landscape" },
+    { "id": "jm-3", "src": "jm-gallery-3", "alt": "Seacliff villa at sunrise", "property": "japamala", "tags": ["architecture", "view"], "orientation": "landscape" },
+    { "id": "jm-4", "src": "jm-gallery-4", "alt": "Private plunge pool on the cliff edge", "property": "japamala", "tags": ["pool"], "orientation": "portrait" },
+    { "id": "jm-5", "src": "jm-gallery-5", "alt": "Diver descending on a coral wall", "property": "japamala", "tags": ["activities", "underwater"], "orientation": "landscape" },
+    { "id": "jm-6", "src": "jm-gallery-6", "alt": "Beach jetty with wooden longboat", "property": "japamala", "tags": ["beach"], "orientation": "landscape" },
+    { "id": "jm-7", "src": "jm-gallery-7", "alt": "Bedroom interior with ocean-facing window", "property": "japamala", "tags": ["interior", "suite"], "orientation": "landscape" },
+    { "id": "jm-8", "src": "jm-gallery-8", "alt": "Rainforest boardwalk at dawn", "property": "japamala", "tags": ["nature"], "orientation": "portrait" },
+
+    { "id": "th-1", "src": "th-gallery-1", "alt": "Verandah dining at Tamarind Hill in the evening", "property": "tamarind-hill", "tags": ["dining", "interior"], "orientation": "landscape", "featured": true },
+    { "id": "th-2", "src": "th-gallery-2", "alt": "Plated khao soi gai", "property": "tamarind-hill", "tags": ["food"], "orientation": "square" },
+    { "id": "th-3", "src": "th-gallery-3", "alt": "The colonial bungalow facade", "property": "tamarind-hill", "tags": ["architecture"], "orientation": "landscape" },
+    { "id": "th-4", "src": "th-gallery-4", "alt": "Miang kham leaves with condiments", "property": "tamarind-hill", "tags": ["food"], "orientation": "portrait" },
+
+    { "id": "ts-1", "src": "ts-gallery-1", "alt": "Open-air pavilion at Tamarind Springs", "property": "tamarind-springs", "tags": ["interior"], "orientation": "landscape", "featured": true },
+    { "id": "ts-2", "src": "ts-gallery-2", "alt": "Amok trei in banana leaf cup", "property": "tamarind-springs", "tags": ["food"], "orientation": "square" },
+    { "id": "ts-3", "src": "ts-gallery-3", "alt": "Lanterns strung across the ravine", "property": "tamarind-springs", "tags": ["atmosphere"], "orientation": "portrait" },
+    { "id": "ts-4", "src": "ts-gallery-4", "alt": "Bò lá lốt grilled over charcoal", "property": "tamarind-springs", "tags": ["food"], "orientation": "landscape" },
+
+    { "id": "fk-1", "src": "fk-gallery-1", "alt": "Lacquered red dining room at FOOK", "property": "fook", "tags": ["interior"], "orientation": "landscape", "featured": true },
+    { "id": "fk-2", "src": "fk-gallery-2", "alt": "Steamed dim sum on the counter", "property": "fook", "tags": ["food"], "orientation": "square" },
+    { "id": "fk-3", "src": "fk-gallery-3", "alt": "Roast duck hanging in the wood-fire oven", "property": "fook", "tags": ["food", "kitchen"], "orientation": "portrait" },
+    { "id": "fk-4", "src": "fk-gallery-4", "alt": "Claypot rice steaming on the pass", "property": "fook", "tags": ["food"], "orientation": "landscape" },
+    { "id": "fk-5", "src": "fk-gallery-5", "alt": "Tea service with Yunnan pu'er", "property": "fook", "tags": ["dining"], "orientation": "square" },
+
+    { "id": "tn-1", "src": "tn-gallery-1", "alt": "Cliffside dining terrace at Than", "property": "than", "tags": ["interior", "view"], "orientation": "landscape", "featured": true },
+    { "id": "tn-2", "src": "tn-gallery-2", "alt": "Line-caught barramundi plated", "property": "than", "tags": ["food"], "orientation": "square" },
+    { "id": "tn-3", "src": "tn-gallery-3", "alt": "Pandan crème brûlée", "property": "than", "tags": ["food"], "orientation": "portrait" },
+
+    { "id": "br-1", "src": "br-gallery-1", "alt": "Beachfront bar at Barra with loungers on the sand", "property": "barra", "tags": ["atmosphere"], "orientation": "landscape", "featured": true },
+    { "id": "br-2", "src": "br-gallery-2", "alt": "Wood-fired pizza fresh from the oven", "property": "barra", "tags": ["food"], "orientation": "square" },
+    { "id": "br-3", "src": "br-gallery-3", "alt": "Kelapa muda cocktail in fresh coconut", "property": "barra", "tags": ["drinks"], "orientation": "portrait" },
+    { "id": "br-4", "src": "br-gallery-4", "alt": "Sunset over the beach at Kampung Lanting", "property": "barra", "tags": ["view"], "orientation": "landscape" }
+  ]
+}

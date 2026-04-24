@@ -1,6 +1,7 @@
 ---
+type ContainerTag = 'div' | 'section' | 'article' | 'aside' | 'header' | 'footer' | 'main';
 interface Props {
-  as?: string;
+  as?: ContainerTag;
   class?: string;
   narrow?: boolean;
 }

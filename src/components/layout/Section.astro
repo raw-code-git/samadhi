@@ -1,17 +1,19 @@
 ---
+type SectionTag = 'section' | 'div' | 'article' | 'aside' | 'header' | 'footer';
 interface Props {
-  as?: string;
+  as?: SectionTag;
   tone?: 'cream' | 'sand' | 'forest' | 'transparent';
   class?: string;
   id?: string;
 }
 const { as: Tag = 'section', tone = 'transparent', class: className = '', id } = Astro.props;
-const toneClass = {
+const TONES: Record<NonNullable<Props['tone']>, string> = {
   cream: 'bg-cream text-ink',
   sand: 'bg-sand-50 text-ink',
   forest: 'bg-forest-900 text-sand-50',
   transparent: '',
-}[tone];
+};
+const toneClass = TONES[tone];
 ---
 <Tag id={id} class:list={['section-y', toneClass, className]}>
   <slot />
