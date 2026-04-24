@@ -1,0 +1,210 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/layout/Container.astro';
+import Section from '../../components/layout/Section.astro';
+import Hero from '../../components/media/Hero.astro';
+import SmartImage from '../../components/media/SmartImage.astro';
+import Button from '../../components/ui/Button.astro';
+import Divider from '../../components/ui/Divider.astro';
+import Chip from '../../components/ui/Chip.astro';
+import OfferCard from '../../components/cards/OfferCard.astro';
+import MenuSection from '../../components/menu/MenuSection.astro';
+import PropertyCard from '../../components/cards/PropertyCard.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import Prose from '../../components/ui/Prose.astro';
+import { buildHero } from '../../lib/images';
+import { restaurantLD, breadcrumbLD } from '../../lib/jsonld';
+
+export async function getStaticPaths() {
+  const properties = await getCollection('properties', ({ data }) => data.type === 'dining');
+  return properties.map((p) => ({ params: { slug: p.slug }, props: { property: p } }));
+}
+
+const { property } = Astro.props;
+const { Content } = await property.render();
+
+const menuEntries = await getCollection('menus');
+const menu = menuEntries.find((m) => m.data.property.id === property.slug);
+
+const allOffers = await getCollection('offers');
+const relatedOffers = allOffers.filter((o) =>
+  o.data.properties.some((ref) => ref.id === property.slug),
+);
+
+const galleryCol = await getCollection('gallery');
+const galleryImages = galleryCol[0].data.images
+  .filter((img) => img.property.id === property.slug)
+  .slice(0, 4);
+
+const parentResort = property.data.partOf ? await getEntry(property.data.partOf) : null;
+
+const excerptItems = menu
+  ? menu.data.sections.flatMap((s) => s.items.filter((i) => i.signature)).slice(0, 4)
+  : [];
+
+const hero = buildHero({
+  src: property.data.heroImage.src,
+  source: property.data.heroImage.source,
+  alt: property.data.heroImage.alt,
+});
+---
+<BaseLayout
+  title={property.data.name}
+  description={property.data.shortDescription}
+  transparentHeader
+  heroPreload={hero.preload}
+>
+  <Fragment slot="head">
+    <JsonLd data={[
+      restaurantLD(property),
+      breadcrumbLD([
+        { name: 'Home', href: '/' },
+        { name: 'Dining', href: '/dining' },
+        { name: property.data.name, href: `/dining/${property.slug}` },
+      ]),
+    ]} />
+  </Fragment>
+
+  <Hero
+    src={property.data.heroImage.src}
+    source={property.data.heroImage.source}
+    alt={property.data.heroImage.alt}
+    eyebrow={property.data.cuisine ?? property.data.location.city}
+    title={property.data.name}
+    subtitle={property.data.tagline}
+    overlay="strong"
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      {menu && <Button href={`/dining/${property.slug}/menu`} variant="primary">View the menu</Button>}
+      <Button href={`/book?propertyId=${property.slug}`} variant="outline" class="border-sand-50/40 text-sand-50 hover:bg-sand-50 hover:text-forest-900">Reserve a table</Button>
+    </div>
+  </Hero>
+
+  <Section tone="cream">
+    <Container>
+      <div class="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">The restaurant</p>
+          <h2 class="text-display-lg font-display mb-6">{property.data.tagline}</h2>
+          <Prose><Content /></Prose>
+        </div>
+        <aside class="bg-sand-50 rounded-2xl p-6 lg:p-8 h-fit border border-forest-900/10">
+          <p class="text-xs uppercase tracking-wider text-forest-700/70 mb-4">Visit</p>
+          <dl class="space-y-3 text-sm">
+            {property.data.cuisine && (
+              <div>
+                <dt class="text-xs uppercase tracking-wider text-forest-700/60">Cuisine</dt>
+                <dd class="text-ink">{property.data.cuisine}</dd>
+              </div>
+            )}
+            {property.data.hours && (
+              <div>
+                <dt class="text-xs uppercase tracking-wider text-forest-700/60">Hours</dt>
+                <dd class="text-ink">{property.data.hours}</dd>
+              </div>
+            )}
+            <div>
+              <dt class="text-xs uppercase tracking-wider text-forest-700/60">Address</dt>
+              <dd class="text-ink">{property.data.location.address}</dd>
+            </div>
+            {property.data.phone && (
+              <div>
+                <dt class="text-xs uppercase tracking-wider text-forest-700/60">Reservations</dt>
+                <dd class="text-ink">{property.data.phone}</dd>
+              </div>
+            )}
+          </dl>
+          <Divider />
+          <Button href={`/book?propertyId=${property.slug}`} variant="primary" class="w-full">Reserve a table</Button>
+        </aside>
+      </div>
+    </Container>
+  </Section>
+
+  {property.data.signatureDishes.length > 0 && (
+    <Section tone="sand">
+      <Container>
+        <div class="mb-10 max-w-prose-wide">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Signature dishes</p>
+          <h2 class="text-display-lg font-display">A few things we're known for.</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          {property.data.signatureDishes.map((dish) => (
+            <article class="bg-cream rounded-xl p-6 border border-forest-900/10">
+              <h3 class="text-xl font-display text-forest-900 mb-2">{dish.name}</h3>
+              <p class="text-sm text-ink/80 leading-relaxed">{dish.description}</p>
+            </article>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {menu && excerptItems.length > 0 && (
+    <Section tone="cream">
+      <Container narrow>
+        <div class="flex items-end justify-between gap-6 mb-8">
+          <div>
+            <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">From the menu</p>
+            <h2 class="text-display-lg font-display">A taste of it.</h2>
+          </div>
+          <Button href={`/dining/${property.slug}/menu`} variant="outline" size="sm">Full menu</Button>
+        </div>
+        <MenuSection name="Signature" items={excerptItems} currency={menu.data.currency} />
+      </Container>
+    </Section>
+  )}
+
+  {galleryImages.length > 0 && (
+    <Section tone="sand">
+      <Container>
+        <div class="mb-8">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Photographs</p>
+          <h2 class="text-display-lg font-display">The room, the food, the light.</h2>
+        </div>
+        <div class="grid gap-3 grid-cols-2 md:grid-cols-4">
+          {galleryImages.map((img) => (
+            <a href={`/gallery?property=${property.slug}#${img.id}`} class="block">
+              <SmartImage
+                src={img.src}
+                alt={img.alt}
+                source={img.source}
+                variant="gallery"
+                aspect={img.orientation === 'portrait' ? 'gallery-portrait' : img.orientation === 'square' ? 'gallery-square' : 'gallery-landscape'}
+              />
+            </a>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {parentResort && (
+    <Section tone="cream">
+      <Container>
+        <div class="mb-6">
+          <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Stay with us</p>
+          <h2 class="text-display-lg font-display">{property.data.name} is part of {parentResort.data.name}.</h2>
+        </div>
+        <div class="max-w-3xl">
+          <PropertyCard property={parentResort} layout="wide" />
+        </div>
+      </Container>
+    </Section>
+  )}
+
+  {relatedOffers.length > 0 && (
+    <Section tone="forest">
+      <Container>
+        <div class="mb-8 max-w-prose-wide">
+          <Chip tone="gold">Packages</Chip>
+          <h2 class="mt-4 text-display-lg font-display text-sand-50">Dining-inclusive offers at {property.data.name}.</h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {relatedOffers.map((o) => <OfferCard offer={o} />)}
+        </div>
+      </Container>
+    </Section>
+  )}
+</BaseLayout>

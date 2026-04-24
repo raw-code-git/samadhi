@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/layout/Container.astro';
+import Section from '../../../components/layout/Section.astro';
+import Button from '../../../components/ui/Button.astro';
+import MenuSection from '../../../components/menu/MenuSection.astro';
+import JsonLd from '../../../components/seo/JsonLd.astro';
+import { breadcrumbLD } from '../../../lib/jsonld';
+import { SITE_URL } from '../../../consts';
+
+export async function getStaticPaths() {
+  const menus = await getCollection('menus');
+  const properties = await getCollection('properties');
+  return menus
+    .map((menu) => {
+      const property = properties.find((p) => p.slug === menu.data.property.id);
+      if (!property) return null;
+      return { params: { slug: property.slug }, props: { menu, property } };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+}
+
+const { menu, property } = Astro.props;
+
+const menuLD = {
+  '@context': 'https://schema.org',
+  '@type': 'Menu',
+  name: `${property.data.name} — Menu`,
+  inLanguage: 'en',
+  hasMenuSection: menu.data.sections.map((s) => ({
+    '@type': 'MenuSection',
+    name: s.name,
+    ...(s.description ? { description: s.description } : {}),
+    hasMenuItem: s.items.map((i) => ({
+      '@type': 'MenuItem',
+      name: i.name,
+      ...(i.description ? { description: i.description } : {}),
+      ...(i.price != null
+        ? { offers: { '@type': 'Offer', price: i.price, priceCurrency: menu.data.currency } }
+        : {}),
+    })),
+  })),
+  about: new URL(`/dining/${property.slug}`, SITE_URL).toString(),
+};
+---
+<BaseLayout
+  title={`${property.data.name} — Menu`}
+  description={`The full menu for ${property.data.name}.`}
+>
+  <Fragment slot="head">
+    <JsonLd data={[
+      menuLD,
+      breadcrumbLD([
+        { name: 'Home', href: '/' },
+        { name: 'Dining', href: '/dining' },
+        { name: property.data.name, href: `/dining/${property.slug}` },
+        { name: 'Menu', href: `/dining/${property.slug}/menu` },
+      ]),
+    ]} />
+  </Fragment>
+
+  <Section tone="cream">
+    <Container narrow>
+      <nav class="mb-8 text-sm text-forest-700/80">
+        <a href={`/dining/${property.slug}`} class="inline-flex items-center gap-1 hover:text-clay-600">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to {property.data.name}
+        </a>
+      </nav>
+      <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">{property.data.cuisine ?? 'Menu'}</p>
+      <h1 class="text-display-xl font-display">{property.data.name}</h1>
+      {menu.data.intro && <p class="mt-5 text-forest-700 leading-relaxed">{menu.data.intro}</p>}
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href={`/book?propertyId=${property.slug}`} variant="primary">Reserve a table</Button>
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="cream">
+    <Container narrow>
+      {menu.data.sections.map((section) => (
+        <MenuSection
+          name={section.name}
+          description={section.description}
+          items={section.items}
+          currency={menu.data.currency}
+        />
+      ))}
+
+      <div class="mt-10 pt-6 border-t border-forest-900/20 text-xs text-forest-700/70">
+        <p><strong class="font-semibold">Dietary:</strong> V — vegetarian · VG — vegan · GF — gluten-free · N — contains nuts · S — spicy. Please let us know of any allergies when booking.</p>
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>

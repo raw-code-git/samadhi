@@ -1,0 +1,57 @@
+---
+const DIETARY_LABELS: Record<string, string> = {
+  v: 'Vegetarian',
+  vg: 'Vegan',
+  gf: 'Gluten-free',
+  n: 'Contains nuts',
+  s: 'Spicy',
+};
+const DIETARY_SHORT: Record<string, string> = {
+  v: 'V',
+  vg: 'VG',
+  gf: 'GF',
+  n: 'N',
+  s: 'S',
+};
+
+interface Props {
+  name: string;
+  description?: string;
+  price?: number;
+  dietary?: string[];
+  signature?: boolean;
+  currency?: string;
+}
+const {
+  name,
+  description,
+  price,
+  dietary = [],
+  signature = false,
+  currency = 'MYR',
+} = Astro.props;
+---
+<div class="flex gap-4 py-4 border-b border-forest-900/10 last:border-0">
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2 flex-wrap">
+      <h4 class="font-display text-lg text-forest-900">{name}</h4>
+      {signature && <span class="text-xs uppercase tracking-wider text-gold-500 font-medium">Signature</span>}
+      {dietary.map((d) => (
+        <span
+          title={DIETARY_LABELS[d] ?? d}
+          class="inline-block text-[10px] font-semibold uppercase tracking-wider text-forest-700/70 border border-forest-900/20 rounded px-1.5 py-0.5"
+        >
+          {DIETARY_SHORT[d] ?? d.toUpperCase()}
+        </span>
+      ))}
+    </div>
+    {description && <p class="text-sm text-ink/75 mt-1 leading-relaxed">{description}</p>}
+  </div>
+  <div class="shrink-0 text-right">
+    {price != null ? (
+      <span class="text-sm font-medium text-forest-900 tabular-nums">{currency} {price}</span>
+    ) : (
+      <span class="text-xs uppercase tracking-wider text-forest-700/60">M/P</span>
+    )}
+  </div>
+</div>

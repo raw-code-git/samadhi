@@ -1,0 +1,37 @@
+---
+import MenuItem from './MenuItem.astro';
+
+interface MenuItemData {
+  name: string;
+  description?: string;
+  price?: number;
+  dietary?: string[];
+  signature?: boolean;
+}
+
+interface Props {
+  name: string;
+  description?: string;
+  items: MenuItemData[];
+  currency?: string;
+}
+const { name, description, items, currency = 'MYR' } = Astro.props;
+---
+<section class="mb-12">
+  <div class="mb-5 flex items-baseline justify-between gap-4 border-b border-forest-900/20 pb-3">
+    <h3 class="text-2xl font-display text-forest-900">{name}</h3>
+    {description && <p class="text-xs uppercase tracking-widest text-forest-700/60 text-right italic">{description}</p>}
+  </div>
+  <div>
+    {items.map((item) => (
+      <MenuItem
+        name={item.name}
+        description={item.description}
+        price={item.price}
+        dietary={item.dietary}
+        signature={item.signature}
+        currency={currency}
+      />
+    ))}
+  </div>
+</section>
