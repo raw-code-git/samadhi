@@ -1,0 +1,111 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Section from '../components/layout/Section.astro';
+import Button from '../components/ui/Button.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { breadcrumbLD } from '../lib/jsonld';
+import { CONTACT_EMAIL } from '../consts';
+
+const properties = await getCollection('properties');
+const stays = properties.filter((p) => p.data.type === 'resort').sort((a, b) => a.data.order - b.data.order);
+const dining = properties.filter((p) => p.data.type === 'dining').sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout
+  title="Contact"
+  description="Get in touch with Samadhi Retreats or any of our properties directly."
+>
+  <Fragment slot="head">
+    <JsonLd data={breadcrumbLD([{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact' }])} />
+  </Fragment>
+
+  <Section tone="cream">
+    <Container>
+      <div class="max-w-prose-wide">
+        <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Contact</p>
+        <h1 class="text-display-xl font-display">Say hello.</h1>
+        <p class="mt-5 text-lg text-forest-700">Ask about a stay, a reservation, a private event, or a retreat. We respond within twelve working hours.</p>
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="cream" class="pt-0">
+    <Container>
+      <div class="grid gap-10 lg:grid-cols-[1fr_1fr]">
+        <form id="contact-form" class="space-y-5">
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class="block">
+              <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Name</span>
+              <input type="text" name="name" autocomplete="name" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 focus:border-clay-600 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Email</span>
+              <input type="email" name="email" autocomplete="email" inputmode="email" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 focus:border-clay-600 focus:outline-none" />
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">How can we help?</span>
+              <select name="topic" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 focus:border-clay-600 focus:outline-none">
+                <option>A stay or reservation</option>
+                <option>A private event</option>
+                <option>A media enquiry</option>
+                <option>Careers</option>
+                <option>Something else</option>
+              </select>
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Message</span>
+              <textarea name="message" rows="5" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 focus:border-clay-600 focus:outline-none"></textarea>
+            </label>
+          </div>
+          <p id="contact-feedback" hidden class="text-sm text-forest-900 bg-gold-500/20 border border-gold-500/40 px-4 py-3 rounded-lg">Thank you — in the live site this would reach our team directly. No message was sent in this demo.</p>
+          <Button type="submit" variant="primary">Send</Button>
+        </form>
+
+        <div class="space-y-8">
+          <div>
+            <h2 class="font-display text-2xl text-forest-900 mb-4">Stays</h2>
+            <ul class="space-y-4">
+              {stays.map((p) => (
+                <li class="border-b border-forest-900/10 pb-4">
+                  <a href={`/stays/${p.slug}`} class="font-medium text-forest-900 hover:text-clay-600">{p.data.name}</a>
+                  <p class="text-sm text-forest-700/90 mt-1">{p.data.location.address}</p>
+                  {p.data.phone && <p class="text-sm text-forest-700/90">{p.data.phone}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 class="font-display text-2xl text-forest-900 mb-4">Dining</h2>
+            <ul class="space-y-4">
+              {dining.map((p) => (
+                <li class="border-b border-forest-900/10 pb-4 last:border-0">
+                  <a href={`/dining/${p.slug}`} class="font-medium text-forest-900 hover:text-clay-600">{p.data.name}</a>
+                  {p.data.phone && <p class="text-sm text-forest-700/90 mt-1">{p.data.phone}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 class="font-display text-2xl text-forest-900 mb-2">Head office</h2>
+            <p class="text-sm text-forest-700/90">
+              <a href={`mailto:${CONTACT_EMAIL}`} class="hover:text-clay-600 underline decoration-forest-900/20">{CONTACT_EMAIL}</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  <script>
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    const feedback = document.getElementById('contact-feedback');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      // TODO: integrate real contact endpoint (mail, CRM, Slack, etc.).
+      form.reset();
+      if (feedback) feedback.hidden = false;
+    });
+  </script>
+</BaseLayout>
