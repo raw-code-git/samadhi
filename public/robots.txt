@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /book
+
+Sitemap: https://samadhi-mock.example/sitemap-index.xml

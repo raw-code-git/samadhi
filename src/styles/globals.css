@@ -1,0 +1,70 @@
+@import '@fontsource-variable/inter/index.css';
+@import '@fontsource/cormorant/400.css';
+@import '@fontsource/cormorant/500.css';
+@import '@fontsource/cormorant/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-sand-50: 251 246 238;
+    --color-cream: 250 245 236;
+    --color-clay-600: 140 58 34;
+    --color-forest-900: 27 46 36;
+    --color-gold-500: 169 134 47;
+    --color-ink: 27 31 26;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 16px;
+    }
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-forest-900;
+    font-weight: 500;
+  }
+
+  ::selection {
+    background: rgb(var(--color-clay-600) / 0.15);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-clay-600));
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-container px-5 sm:px-8 lg:px-12;
+  }
+
+  .section-y {
+    padding-block: theme('spacing.section');
+  }
+
+  .sr-only-focusable {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cream focus:text-forest-900 focus:rounded;
+  }
+}
