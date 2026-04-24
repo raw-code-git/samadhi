@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Section from '../components/layout/Section.astro';
+import BookingForm from '../components/booking/BookingForm.astro';
+---
+<BaseLayout
+  title="Reserve"
+  description="Reserve a stay or table with Samadhi Retreats. (Demo booking form.)"
+  noindex
+>
+  <Section tone="cream">
+    <Container narrow>
+      <div class="rounded-xl border border-gold-500/40 bg-gold-500/10 px-4 py-3 text-sm text-forest-900 mb-8 flex items-start gap-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 mt-0.5 text-gold-500"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <div>
+          <p class="font-medium">Demo mode — no real bookings.</p>
+          <p class="text-forest-700/80">This mock form shows the end-to-end flow and prefills from URL parameters. It saves a draft to your browser between sessions. No data is sent anywhere.</p>
+        </div>
+      </div>
+
+      <p class="text-xs uppercase tracking-[0.24em] text-clay-600 mb-3">Reserve</p>
+      <h1 class="text-display-xl font-display">Tell us when you'd like to stay.</h1>
+      <p class="mt-4 text-forest-700">We hold your preferred room for 24 hours while you decide. Our reservations team confirms by email within 12 hours.</p>
+
+      <div class="mt-10">
+        <BookingForm />
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>

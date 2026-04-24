@@ -1,0 +1,262 @@
+---
+import { getCollection } from 'astro:content';
+import Button from '../ui/Button.astro';
+
+const properties = await getCollection('properties');
+const offers = await getCollection('offers');
+
+const propertyOptions = properties
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p) => ({ slug: p.slug, name: p.data.name, type: p.data.type }));
+
+const offerOptions = offers.map((o) => ({ slug: o.slug, title: o.data.title }));
+---
+<form id="booking-form" class="space-y-6" novalidate>
+  <ol class="flex items-center gap-2 text-xs uppercase tracking-widest text-forest-700/60" aria-label="Progress">
+    <li data-step-indicator="1" class="flex items-center gap-2 data-[active=true]:text-clay-600 data-[done=true]:text-forest-900" data-active="true">
+      <span class="h-6 w-6 rounded-full border border-current grid place-items-center font-semibold">1</span>
+      <span>Stay</span>
+    </li>
+    <span class="h-px flex-1 bg-forest-900/15"></span>
+    <li data-step-indicator="2" class="flex items-center gap-2 data-[active=true]:text-clay-600 data-[done=true]:text-forest-900">
+      <span class="h-6 w-6 rounded-full border border-current grid place-items-center font-semibold">2</span>
+      <span>Contact</span>
+    </li>
+    <span class="h-px flex-1 bg-forest-900/15"></span>
+    <li data-step-indicator="3" class="flex items-center gap-2 data-[active=true]:text-clay-600 data-[done=true]:text-forest-900">
+      <span class="h-6 w-6 rounded-full border border-current grid place-items-center font-semibold">3</span>
+      <span>Review</span>
+    </li>
+  </ol>
+
+  <section data-step="1" class="space-y-5">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Property</span>
+        <select id="propertyId" name="propertyId" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none">
+          <option value="">Choose a property</option>
+          <optgroup label="Stays">
+            {propertyOptions.filter((p) => p.type === 'resort').map((p) => (
+              <option value={p.slug}>{p.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Dining">
+            {propertyOptions.filter((p) => p.type === 'dining').map((p) => (
+              <option value={p.slug}>{p.name}</option>
+            ))}
+          </optgroup>
+        </select>
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Offer (optional)</span>
+        <select id="offerId" name="offerId" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none">
+          <option value="">No offer applied</option>
+          {offerOptions.map((o) => <option value={o.slug}>{o.title}</option>)}
+        </select>
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Arrive</span>
+        <input type="date" id="checkIn" name="checkIn" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Depart</span>
+        <input type="date" id="checkOut" name="checkOut" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Guests</span>
+        <input type="number" inputmode="numeric" min="1" max="8" value="2" id="guests" name="guests" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Room preference</span>
+        <input type="text" id="roomPreference" name="roomPreference" placeholder="e.g. private plunge pool" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+    </div>
+    <div class="flex justify-end">
+      <Button type="button" variant="primary" class="booking-next" data-from="1">Continue</Button>
+    </div>
+  </section>
+
+  <section data-step="2" hidden class="space-y-5">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">First name</span>
+        <input type="text" id="firstName" name="firstName" autocomplete="given-name" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Last name</span>
+        <input type="text" id="lastName" name="lastName" autocomplete="family-name" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Email</span>
+        <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Phone</span>
+        <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none" />
+      </label>
+      <label class="block sm:col-span-2">
+        <span class="block text-xs uppercase tracking-wider text-forest-700/70 mb-1.5">Notes for our reservations team</span>
+        <textarea id="notes" name="notes" rows="3" class="w-full rounded-lg border border-forest-900/20 bg-cream px-4 py-3 text-ink focus:border-clay-600 focus:outline-none"></textarea>
+      </label>
+    </div>
+    <div class="flex justify-between">
+      <Button type="button" variant="ghost" class="booking-prev" data-from="2">Back</Button>
+      <Button type="button" variant="primary" class="booking-next" data-from="2">Review</Button>
+    </div>
+  </section>
+
+  <section data-step="3" hidden class="space-y-5">
+    <div class="rounded-2xl bg-sand-50 border border-forest-900/10 p-6">
+      <h3 class="font-display text-2xl text-forest-900 mb-4">Your request</h3>
+      <dl id="booking-summary" class="grid gap-3 sm:grid-cols-2 text-sm"></dl>
+    </div>
+    <div class="flex justify-between">
+      <Button type="button" variant="ghost" class="booking-prev" data-from="3">Back</Button>
+      <Button type="submit" variant="primary">Confirm request</Button>
+    </div>
+  </section>
+</form>
+
+<section id="booking-confirmation" hidden class="text-center py-10">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto text-gold-500"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+  <h2 class="mt-4 text-display-lg font-display text-forest-900">Request received — in the demo.</h2>
+  <p class="mt-3 max-w-prose mx-auto text-forest-700/90">
+    In the live site, our reservations team would reply within 12 hours with availability and a hold. For this mock, your details have been cleared and no booking has been made.
+  </p>
+  <div class="mt-6">
+    <Button href="/" variant="primary">Back to home</Button>
+  </div>
+</section>
+
+<script>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const FIELD_LABELS: Record<string, string> = {
+    propertyId: 'Property',
+    offerId: 'Offer',
+    checkIn: 'Arrive',
+    checkOut: 'Depart',
+    guests: 'Guests',
+    roomPreference: 'Room preference',
+    firstName: 'First name',
+    lastName: 'Last name',
+    email: 'Email',
+    phone: 'Phone',
+    notes: 'Notes',
+  };
+  const DRAFT_KEY = 'samadhi:booking-draft:v1';
+
+  const form = document.getElementById('booking-form') as HTMLFormElement | null;
+  const confirmation = document.getElementById('booking-confirmation');
+  if (form && confirmation) {
+    const steps = Array.from(form.querySelectorAll<HTMLElement>('[data-step]'));
+    const indicators = Array.from(document.querySelectorAll<HTMLElement>('[data-step-indicator]'));
+    let current = 1;
+
+    function show(step: number) {
+      current = step;
+      for (const s of steps) {
+        s.hidden = Number(s.dataset.step) !== step;
+      }
+      for (const ind of indicators) {
+        const n = Number(ind.dataset.stepIndicator);
+        ind.dataset.active = n === step ? 'true' : 'false';
+        ind.dataset.done = n < step ? 'true' : 'false';
+      }
+      if (step === 3) renderSummary();
+      window.scrollTo({ top: form!.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+    }
+
+    function serialize() {
+      const fd = new FormData(form!);
+      const out: Record<string, string> = {};
+      for (const [k, v] of fd.entries()) out[k] = String(v);
+      return out;
+    }
+
+    function saveDraft() {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(serialize())); } catch { /* quota */ }
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw) as Record<string, string>;
+        for (const [k, v] of Object.entries(data)) {
+          const el = form!.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
+          if (el && !el.value) el.value = v;
+        }
+      } catch { /* ignore */ }
+    }
+
+    function applyQueryParams() {
+      const q = new URLSearchParams(window.location.search);
+      for (const k of ['propertyId', 'offerId', 'checkIn', 'checkOut', 'guests']) {
+        const v = q.get(k);
+        if (v) {
+          const el = form!.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null;
+          if (el) el.value = v;
+        }
+      }
+    }
+
+    function renderSummary() {
+      const data = serialize();
+      const dl = document.getElementById('booking-summary');
+      if (!dl) return;
+      dl.innerHTML = '';
+      for (const [k, v] of Object.entries(data)) {
+        if (!v) continue;
+        const dt = document.createElement('dt');
+        dt.className = 'text-xs uppercase tracking-wider text-forest-700/60';
+        dt.textContent = FIELD_LABELS[k] ?? k;
+        const dd = document.createElement('dd');
+        dd.className = 'text-ink mb-2';
+        dd.textContent = v;
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+      }
+    }
+
+    function validateStep(step: number): boolean {
+      const fields = Array.from(form!.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[data-step="${step}"] [required]`));
+      for (const f of fields) {
+        if (!f.checkValidity()) {
+          f.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    form.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const next = t.closest('.booking-next') as HTMLButtonElement | null;
+      const prev = t.closest('.booking-prev') as HTMLButtonElement | null;
+      if (next) {
+        if (!validateStep(current)) return;
+        saveDraft();
+        show(current + 1);
+      } else if (prev) {
+        show(current - 1);
+      }
+    });
+
+    form.addEventListener('input', saveDraft);
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validateStep(current)) return;
+      // TODO: integrate real booking backend — POST serialize() to the
+      // reservations API, handle availability check + confirmation email.
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      form!.hidden = true;
+      confirmation!.hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    loadDraft();
+    applyQueryParams();
+    show(1);
+  }
+</script>
